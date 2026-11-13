@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart GeoPortal</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
+    body { display: flex; height: 100vh; overflow: hidden; background: #0f172a; }
+
+    /* Sidebar Glassmorphism */
+    .sidebar {
+      width: 340px;
+      background: linear-gradient(160deg, rgba(49, 46, 129, 0.92), rgba(88, 28, 135, 0.88));
+      backdrop-filter: blur(16px);
+      color: #f8fafc;
+      padding: 28px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      border-right: 1px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 4px 0 24px rgba(0, 0, 0, 0.3);
+      z-index: 1000;
+    }
+
+    .badge {
+      display: inline-block;
+      background: rgba(255, 255, 255, 0.18);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      letter-spacing: 0.5px;
+      width: fit-content;
+    }
+
+    h1 { font-size: 1.5rem; font-weight: 700; line-height: 1.2; }
+    .subtitle { font-size: 0.88rem; color: #cbd5e1; line-height: 1.5; }
+
+    .card {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 14px;
+      padding: 16px;
+      transition: transform 0.2s ease;
+    }
+    .card:hover { transform: translateY(-2px); background: rgba(255, 255, 255, 0.14); }
+    .card-title { font-size: 0.8rem; text-transform: uppercase; color: #e2e8f0; letter-spacing: 0.8px; }
+    .card-value { font-size: 1.8rem; font-weight: 700; margin-top: 4px; color: #ffffff; }
+    .card-desc { font-size: 0.82rem; color: #cbd5e1; margin-top: 6px; }
+
+    /* Kawasan Peta */
+    #map { flex: 1; height: 100%; }
+
+    /* Responsif untuk Telefon */
+    @media (max-width: 768px) {
+      body { flex-direction: column; }
+      .sidebar { width: 100%; height: auto; max-height: 45vh; overflow-y: auto; }
+    }
+  </style>
+</head>
+<body>
+
+  <aside class="sidebar">
+    <span class="badge">PORTAL INTERAKTIF</span>
+    <div>
+      <h1>Smart GeoPortal</h1>
+      <p class="subtitle" style="margin-top: 8px;">Sistem paparan maklumat ruang, analisis lokasi, dan data interaktif bersepadu.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Jumlah Rekod Data</div>
+      <div class="card-value">128</div>
+      <div class="card-desc">Kemaskini terkini pangkalan data</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Panduan Pengguna</div>
+      <div class="card-desc">Gunakan tetikus untuk zum masuk/keluar pada peta atau klik penanda lokasi untuk maklumat lanjut.</div>
+    </div>
+  </aside>
+
+  <main id="map"></main>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    const map = L.map('map').setView([3.0738, 101.5183], 12);
+
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+      attribution: '&copy; OpenStreetMap &copy; CARTO'
+    }).addTo(map);
+
+    // Contoh penanda lokasi pertama
+    L.marker([3.0738, 101.5183]).addTo(map)
+      .bindPopup('<b>Pusat Rujukan Utama</b><br>Kawasan kajian aktif.')
+      .openPopup();
+  </script>
+</body>
+</html>
