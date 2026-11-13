@@ -10,7 +10,7 @@
   <!-- Leaflet Geocoder (Search) CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
   <!-- Google Fonts & FontAwesome -->
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
   <style>
@@ -18,83 +18,250 @@
     body, html {
       margin: 0; padding: 0; height: 100%;
       font-family: 'Plus Jakarta Sans', sans-serif;
-      overflow: hidden; background: #030712; color: #f9fafb;
+      overflow: hidden; background: #f8fafc; color: #0f172a;
     }
 
-    /* Landing Page */
+    /* ================= INTERACTIVE LANDING PAGE ================= */
     #landing-page {
-      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-      z-index: 99999; background: #030712; display: flex; flex-direction: column;
+      position: fixed; inset: 0; width: 100vw; height: 100vh;
+      z-index: 99999; display: flex; flex-direction: column;
       justify-content: space-between; overflow: hidden;
-      transition: opacity 0.5s ease, visibility 0.5s ease;
+      background: #eef4f8;
+      transition: opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.55s ease;
     }
-    .video-bg {
-      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-      object-fit: cover; z-index: -2; filter: brightness(0.35) contrast(1.1);
+
+    /* Live Interactive Map Background */
+    #hero-bg-map {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      z-index: 0; filter: saturate(1.15) contrast(1.03);
     }
-    .video-overlay {
-      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-      background: radial-gradient(circle at center, rgba(3, 7, 18, 0.4) 0%, rgba(3, 7, 18, 0.9) 100%);
-      z-index: -1;
+
+    /* Soft Gradient Vignette so Left Text is Super Readable while Right Map Stays Alive */
+    .hero-vignette {
+      position: absolute; inset: 0; z-index: 1; pointer-events: none;
+      background: linear-gradient(
+        95deg,
+        rgba(248, 250, 252, 0.96) 0%,
+        rgba(248, 250, 252, 0.90) 38%,
+        rgba(248, 250, 252, 0.45) 68%,
+        rgba(248, 250, 252, 0.15) 100%
+      );
     }
+
+    /* Pulsing Facility Beacons on Background Map */
+    .beacon-pin {
+      position: relative; width: 14px; height: 14px; border-radius: 50%;
+      border: 2.5px solid #ffffff; box-shadow: 0 2px 8px rgba(15, 23, 42, 0.3);
+    }
+    .beacon-pin::after {
+      content: ''; position: absolute; inset: -8px; border-radius: 50%;
+      border: 2px solid currentColor; opacity: 0;
+      animation: pulseRing 2.4s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+    }
+    @keyframes pulseRing {
+      0% { transform: scale(0.4); opacity: 0.85; }
+      80%, 100% { transform: scale(2.1); opacity: 0; }
+    }
+
+    /* Top Floating Navbar */
     .app-header {
-      padding: 18px 40px; display: flex; justify-content: space-between; align-items: center;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1); backdrop-filter: blur(12px); background: rgba(3, 7, 18, 0.5);
+      position: relative; z-index: 10;
+      margin: 16px 32px 0 32px; padding: 12px 24px;
+      display: flex; justify-content: space-between; align-items: center;
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(203, 213, 225, 0.7);
+      border-radius: 16px;
+      box-shadow: 0 10px 30px -10px rgba(15, 23, 42, 0.08);
     }
     .brand-container { display: flex; align-items: center; gap: 12px; }
     .brand-icon {
-      width: 40px; height: 40px; background: linear-gradient(135deg, #2563eb, #06b6d4);
-      border-radius: 10px; display: flex; align-items: center; justify-content: center;
-      font-weight: 800; font-size: 1.2rem; box-shadow: 0 0 20px rgba(37, 99, 235, 0.6);
+      width: 40px; height: 40px;
+      background: linear-gradient(135deg, #0284c7, #10b981);
+      border-radius: 11px; display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; color: #ffffff;
+      box-shadow: 0 6px 16px rgba(2, 132, 199, 0.28);
+    }
+    .district-switcher {
+      display: flex; align-items: center; gap: 6px;
+      background: #f1f5f9; padding: 4px; border-radius: 10px;
+      border: 1px solid #e2e8f0;
+    }
+    .dist-btn {
+      border: none; background: transparent; color: #475569;
+      padding: 6px 12px; border-radius: 7px; font-size: 0.76rem;
+      font-weight: 700; cursor: pointer; transition: all 0.2s ease;
+    }
+    .dist-btn:hover { color: #0f172a; }
+    .dist-btn.active {
+      background: #ffffff; color: #0284c7;
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.08);
     }
     .launch-btn {
-      background: linear-gradient(135deg, #2563eb, #1d4ed8); color: white; border: 1px solid rgba(147, 197, 253, 0.4);
-      padding: 10px 24px; border-radius: 30px; font-size: 0.88rem; font-weight: 700; cursor: pointer;
+      background: #0f172a; color: #ffffff; border: none;
+      padding: 10px 20px; border-radius: 10px; font-size: 0.82rem; font-weight: 700;
+      cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; gap: 8px;
     }
-    .hero-container { max-width: 1000px; margin: 0 auto; padding: 0 20px; text-align: center; }
-    .hero-title { font-size: 2.5rem; font-weight: 800; margin-bottom: 15px; }
-    .hero-title span { background: linear-gradient(135deg, #60a5fa, #38bdf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    .preview-card { background: rgba(15, 23, 42, 0.75); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 20px; padding: 22px; }
-    .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; text-align: left; }
-    .feature-item { background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 15px; }
-    .big-cta-btn { width: 100%; padding: 15px; background: linear-gradient(135deg, #2563eb, #1d4ed8); color: white; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; }
-    .app-footer { padding: 15px 40px; display: flex; justify-content: space-between; font-size: 0.78rem; color: #6b7280; }
+    .launch-btn:hover { background: #0284c7; transform: translateY(-1px); }
 
-    /* Portal Main Layout */
+    /* Split-Hero Main Content */
+    .hero-split {
+      position: relative; z-index: 10;
+      max-width: 1280px; width: 100%; margin: 0 auto; padding: 0 36px;
+      display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 36px; align-items: center;
+    }
+
+    .hero-left { max-width: 580px; }
+    .live-pill {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(255, 255, 255, 0.9); border: 1px solid #bae6fd;
+      padding: 6px 14px; border-radius: 999px; font-size: 0.76rem; font-weight: 700;
+      color: #0369a1; margin-bottom: 16px; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.08);
+    }
+    .live-dot {
+      width: 8px; height: 8px; border-radius: 50%; background: #10b981;
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25);
+    }
+    .hero-title {
+      font-size: 2.65rem; font-weight: 800; line-height: 1.15;
+      color: #0f172a; margin: 0 0 14px 0; letter-spacing: -0.025em;
+    }
+    .hero-title span {
+      background: linear-gradient(135deg, #0284c7 0%, #0d9488 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .hero-desc {
+      font-size: 0.95rem; color: #334155; line-height: 1.65; margin: 0 0 22px 0;
+    }
+
+    /* Interactive Category Cards */
+    .category-stack {
+      display: flex; flex-direction: column; gap: 10px; margin-bottom: 22px;
+    }
+    .cat-card {
+      display: flex; align-items: center; justify-content: space-between;
+      background: rgba(255, 255, 255, 0.88); backdrop-filter: blur(12px);
+      border: 1px solid rgba(203, 213, 225, 0.85); border-radius: 14px;
+      padding: 12px 16px; cursor: pointer; transition: all 0.22s ease;
+      text-align: left;
+    }
+    .cat-card:hover {
+      background: #ffffff; border-color: #0284c7;
+      transform: translateX(6px);
+      box-shadow: 0 10px 25px -8px rgba(2, 132, 199, 0.22);
+    }
+    .cat-left { display: flex; align-items: center; gap: 14px; }
+    .cat-icon {
+      width: 40px; height: 40px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center; font-size: 1.15rem;
+    }
+    .cat-title { font-size: 0.9rem; font-weight: 700; color: #0f172a; }
+    .cat-sub { font-size: 0.77rem; color: #64748b; margin-top: 2px; }
+    .cat-badge {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; font-weight: 600;
+      padding: 4px 10px; border-radius: 8px; background: #f1f5f9; color: #334155;
+      display: flex; align-items: center; gap: 6px;
+    }
+
+    .big-cta-btn {
+      width: 100%; padding: 15px 22px;
+      background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+      color: #ffffff; border: none; border-radius: 14px;
+      font-size: 0.94rem; font-weight: 700; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      box-shadow: 0 12px 24px -6px rgba(2, 132, 199, 0.45);
+      transition: all 0.25s ease;
+    }
+    .big-cta-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 16px 30px -6px rgba(2, 132, 199, 0.55);
+    }
+
+    /* Right Side Floating Telemetry Card over Live Map */
+    .hero-right {
+      display: flex; flex-direction: column; align-items: flex-end; justify-content: flex-end;
+      height: 100%; pointer-events: none;
+    }
+    .floating-telemetry {
+      pointer-events: auto;
+      background: rgba(255, 255, 255, 0.88); backdrop-filter: blur(16px);
+      border: 1px solid rgba(203, 213, 225, 0.85); border-radius: 18px;
+      padding: 18px 20px; width: 310px;
+      box-shadow: 0 20px 40px -15px rgba(15, 23, 42, 0.15);
+    }
+    .tele-header {
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 0.75rem; font-weight: 700; color: #475569;
+      border-bottom: 1px solid #e2e8f0; padding-bottom: 8px; margin-bottom: 12px;
+    }
+    .tele-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+    .tele-stat {
+      background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px;
+    }
+    .tele-num { font-size: 1.25rem; font-weight: 800; color: #0284c7; }
+    .tele-lbl { font-size: 0.7rem; color: #64748b; font-weight: 600; margin-top: 2px; }
+    .tele-legend {
+      display: flex; flex-wrap: wrap; gap: 10px; font-size: 0.72rem; font-weight: 600; color: #334155;
+    }
+    .dot-ind { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 4px; }
+
+    /* Bottom Footer */
+    .app-footer {
+      position: relative; z-index: 10;
+      padding: 12px 36px; display: flex; justify-content: space-between; align-items: center;
+      font-size: 0.75rem; color: #475569;
+      background: rgba(255, 255, 255, 0.82); backdrop-filter: blur(12px);
+      border-top: 1px solid rgba(203, 213, 225, 0.7);
+    }
+    .mono-coords {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.73rem;
+      background: #f1f5f9; padding: 4px 10px; border-radius: 6px; color: #0f172a;
+      border: 1px solid #cbd5e1;
+    }
+
+    @media (max-width: 960px) {
+      .hero-split { grid-template-columns: 1fr; padding: 16px 20px; }
+      .hero-right, .district-switcher { display: none; }
+      .hero-title { font-size: 1.9rem; }
+      .app-header { margin: 10px 16px 0 16px; padding: 10px 16px; }
+      #landing-page { overflow-y: auto; }
+    }
+
+    /* ================= PORTAL MAIN LAYOUT ================= */
     #portal-container { display: flex; flex-direction: column; height: 100vh; width: 100vw; }
     header.portal-header {
-      background-color: #0b1329; color: white; padding: 8px 18px; display: flex; justify-content: space-between; align-items: center;
-      border-bottom: 1px solid #1e293b; height: 50px; z-index: 1000;
+      background-color: #0f172a; color: white; padding: 8px 18px; display: flex; justify-content: space-between; align-items: center;
+      border-bottom: 1px solid #1e293b; height: 52px; z-index: 1000;
     }
-    .top-toolbar { display: flex; align-items: center; gap: 6px; background: rgba(255, 255, 255, 0.1); padding: 4px 8px; border-radius: 8px; }
+    .top-toolbar { display: flex; align-items: center; gap: 6px; background: rgba(255, 255, 255, 0.08); padding: 4px 8px; border-radius: 8px; }
     .tool-btn { background: transparent; border: none; color: #e2e8f0; padding: 6px 10px; border-radius: 6px; font-size: 0.78rem; font-weight: 600; cursor: pointer; }
-    .tool-btn:hover { background: rgba(255, 255, 255, 0.2); }
+    .tool-btn:hover { background: rgba(255, 255, 255, 0.16); }
     .btn-back { background: #dc2626; color: white; border: none; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 0.78rem; font-weight: 600; }
 
-    #main-portal { display: flex; flex: 1; height: calc(100vh - 50px); position: relative; }
-    .icon-sidebar { width: 50px; background: #0f172a; border-right: 1px solid #1e293b; display: flex; flex-direction: column; align-items: center; padding-top: 10px; gap: 15px; z-index: 600; }
-    .side-icon-btn { width: 36px; height: 36px; border-radius: 8px; background: transparent; border: none; color: #94a3b8; cursor: pointer; font-size: 1rem; }
-    .side-icon-btn:hover, .side-icon-btn.active { background: #2563eb; color: white; }
+    #main-portal { display: flex; flex: 1; height: calc(100vh - 52px); position: relative; }
+    .icon-sidebar { width: 52px; background: #0f172a; border-right: 1px solid #1e293b; display: flex; flex-direction: column; align-items: center; padding-top: 12px; gap: 14px; z-index: 600; }
+    .side-icon-btn { width: 38px; height: 38px; border-radius: 9px; background: transparent; border: none; color: #94a3b8; cursor: pointer; font-size: 1rem; }
+    .side-icon-btn:hover, .side-icon-btn.active { background: #0284c7; color: white; }
 
-    #sidebar-panel { width: 300px; background: #ffffff; border-right: 1px solid #cbd5e1; padding: 15px; display: flex; flex-direction: column; gap: 15px; z-index: 550; overflow-y: auto; color: #0f172a; }
-    .panel-section-title { font-size: 0.88rem; font-weight: 700; color: #1e293b; border-bottom: 2px solid #2563eb; padding-bottom: 5px; margin-bottom: 10px; }
-    .layer-group { display: flex; flex-direction: column; gap: 8px; font-size: 0.82rem; }
-    .buffer-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+    #sidebar-panel { width: 310px; background: #ffffff; border-right: 1px solid #cbd5e1; padding: 16px; display: flex; flex-direction: column; gap: 16px; z-index: 550; overflow-y: auto; color: #0f172a; }
+    .panel-section-title { font-size: 0.88rem; font-weight: 700; color: #0f172a; border-bottom: 2px solid #0284c7; padding-bottom: 6px; margin-bottom: 10px; }
+    .layer-group { display: flex; flex-direction: column; gap: 9px; font-size: 0.83rem; }
+    .layer-group label { display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 500; }
+    .buffer-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
     .buffer-box label { font-size: 0.78rem; font-weight: 600; color: #334155; }
-    .buffer-box select { padding: 6px 10px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.8rem; }
-    .btn-analisis { background: #2563eb; color: white; border: none; padding: 8px; border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 0.8rem; }
+    .buffer-box select { padding: 7px 10px; border-radius: 7px; border: 1px solid #cbd5e1; font-size: 0.8rem; }
+    .btn-analisis { background: #0284c7; color: white; border: none; padding: 9px; border-radius: 7px; font-weight: 700; cursor: pointer; font-size: 0.8rem; }
     
     #map { flex: 1; height: 100%; width: 100%; }
-    .coords-box { position: absolute; bottom: 10px; right: 10px; background: rgba(15, 23, 42, 0.85); color: #ffffff; padding: 5px 12px; border-radius: 6px; font-size: 0.75rem; z-index: 500; border: 1px solid rgba(255, 255, 255, 0.2); }
+    .coords-box { position: absolute; bottom: 12px; right: 12px; background: rgba(15, 23, 42, 0.88); color: #ffffff; padding: 6px 12px; border-radius: 7px; font-size: 0.75rem; font-family: 'JetBrains Mono', monospace; z-index: 500; border: 1px solid rgba(255, 255, 255, 0.18); }
 
-    /* Map Legend Style */
     .map-legend {
-      background: white; color: #1e293b; padding: 10px 14px; border-radius: 8px;
-      box-shadow: 0 0 15px rgba(0,0,0,0.2); font-size: 0.78rem; line-height: 1.5;
+      background: rgba(255, 255, 255, 0.95); color: #1e293b; padding: 10px 14px; border-radius: 10px;
+      box-shadow: 0 4px 16px rgba(15, 23, 42, 0.15); font-size: 0.78rem; line-height: 1.5; border: 1px solid #e2e8f0;
     }
     .map-legend h4 { margin: 0 0 6px 0; font-size: 0.82rem; font-weight: 700; border-bottom: 1px solid #cbd5e1; padding-bottom: 4px; }
     .legend-item { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
-    .legend-color { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+    .legend-color { width: 11px; height: 11px; border-radius: 50%; display: inline-block; }
   </style>
 
   <!-- Leaflet JS & Geocoder -->
@@ -103,51 +270,123 @@
 </head>
 <body>
 
-  <!-- 1. LANDING PAGE -->
+  <!-- 1. INTERACTIVE THEME-MATCHED LANDING PAGE -->
   <div id="landing-page">
-    <video class="video-bg" autoplay loop muted playsinline>
-      <source src="https://assets.mixkit.co/videos/preview/mixkit-top-view-of-a-highway-with-cars-41527-large.mp4" type="video/mp4">
-    </video>
-    <div class="video-overlay"></div>
+    <!-- Live Interactive Map Canvas in Background -->
+    <div id="hero-bg-map"></div>
+    <div class="hero-vignette"></div>
 
-    <div class="app-header">
+    <!-- Top Floating Navbar -->
+    <header class="app-header">
       <div class="brand-container">
         <div class="brand-icon"><i class="fa-solid fa-map-location-dot"></i></div>
         <div>
-          <div style="font-weight:800; font-size:1.15rem; color:#fff;">GeoAkses Selangor</div>
-          <div style="font-size:0.78rem; color:#9ca3af;">Portal Kebolehcapaian Fasiliti Awam Negeri Selangor</div>
+          <div style="font-weight:800; font-size:1.1rem; color:#0f172a; letter-spacing:-0.01em;">GeoAkses Selangor</div>
+          <div style="font-size:0.74rem; color:#64748b; font-weight:500;">Portal Kebolehcapaian Fasiliti Awam Negeri Selangor</div>
         </div>
       </div>
-      <button class="launch-btn" onclick="enterPortal()">Buka Peta Interaktif ↗</button>
-    </div>
 
-    <div class="hero-container">
-      <div style="background:rgba(37,99,235,0.15); border:1px solid rgba(59,130,246,0.4); padding:6px 18px; border-radius:20px; font-size:0.8rem; color:#60a5fa; display:inline-block; margin-bottom:15px;">📊 GIS Spatial Analytics Platform</div>
-      <h1 class="hero-title">Pemetaan & Analisis Kebolehcapaian<br><span>Fasiliti Awam Selangor</span></h1>
-      
-      <div class="preview-card">
-        <div class="features-grid">
-          <div class="feature-item">
-            <div>🕌 <strong>Masjid & Surau</strong></div>
-            <p style="font-size:0.78rem; color:#9ca3af; margin:4px 0 0 0;">Taburan institusi keagamaan tempatan.</p>
+      <!-- Interactive District Camera Switcher on Landing Page -->
+      <div class="district-switcher" title="Tukar tumpuan peta latar belakang">
+        <button class="dist-btn active" onclick="focusHeroDistrict(3.0738, 101.5183, 12, this)">Shah Alam</button>
+        <button class="dist-btn" onclick="focusHeroDistrict(3.1073, 101.6067, 13, this)">Petaling Jaya</button>
+        <button class="dist-btn" onclick="focusHeroDistrict(3.0449, 101.4456, 13, this)">Klang</button>
+        <button class="dist-btn" onclick="focusHeroDistrict(2.9935, 101.7874, 13, this)">Kajang</button>
+      </div>
+
+      <button class="launch-btn" onclick="enterPortal('all')">
+        <span>Buka Peta</span>
+        <i class="fa-solid fa-arrow-up-right-from-square" style="font-size:0.75rem;"></i>
+      </button>
+    </header>
+
+    <!-- Main Split-Hero Content -->
+    <div class="hero-split">
+      <div class="hero-left">
+        <div class="live-pill">
+          <span class="live-dot"></span>
+          <span>SISTEM ANALISIS KEBOLEHCAPAIAN RUANG SELANGOR</span>
+        </div>
+
+        <h1 class="hero-title">Pemetaan & Analisis <span>Fasiliti Awam Selangor</span></h1>
+        <p class="hero-desc">
+          Terokai taburan ruang institusi keagamaan, perkhidmatan kecemasan, dan kemudahan kesihatan awam. Klik mana-mana kategori di bawah untuk terus memaparkan lapisan data pada peta.
+        </p>
+
+        <!-- Interactive Category Cards that Launch Specific Layers -->
+        <div class="category-stack">
+          <button class="cat-card" onclick="enterPortal('masjid')">
+            <div class="cat-left">
+              <div class="cat-icon" style="background:#dcfce7; color:#15803d;">🕌</div>
+              <div>
+                <div class="cat-title">Masjid & Surau</div>
+                <div class="cat-sub">Taburan institusi keagamaan & akses kariah tempatan</div>
+              </div>
+            </div>
+            <div class="cat-badge"><span>Lihat Peta</span> <i class="fa-solid fa-chevron-right"></i></div>
+          </button>
+
+          <button class="cat-card" onclick="enterPortal('keselamatan')">
+            <div class="cat-left">
+              <div class="cat-icon" style="background:#fee2e2; color:#b91c1c;">🚒</div>
+              <div>
+                <div class="cat-title">Polis & Bomba</div>
+                <div class="cat-sub">Jejari liputan tindak balas kecemasan & keselamatan</div>
+              </div>
+            </div>
+            <div class="cat-badge"><span>Lihat Peta</span> <i class="fa-solid fa-chevron-right"></i></div>
+          </button>
+
+          <button class="cat-card" onclick="enterPortal('kesihatan')">
+            <div class="cat-left">
+              <div class="cat-icon" style="background:#dbeafe; color:#1d4ed8;">🏥</div>
+              <div>
+                <div class="cat-title">Hospital & Klinik Awam</div>
+                <div class="cat-sub">Analisis kemudahsampaian fasiliti kesihatan masyarakat</div>
+              </div>
+            </div>
+            <div class="cat-badge"><span>Lihat Peta</span> <i class="fa-solid fa-chevron-right"></i></div>
+          </button>
+        </div>
+
+        <button class="big-cta-btn" onclick="enterPortal('all')">
+          <i class="fa-solid fa-layer-group"></i>
+          <span>Buka Peta Interaktif & Analisis Buffer</span>
+          <i class="fa-solid fa-arrow-right"></i>
+        </button>
+      </div>
+
+      <!-- Floating Live Spatial Telemetry Card over Map -->
+      <div class="hero-right">
+        <div class="floating-telemetry">
+          <div class="tele-header">
+            <span><i class="fa-solid fa-satellite" style="color:#0284c7; margin-right:6px;"></i>RANGKAIAN DATA AKTIF</span>
+            <span style="color:#10b981;">● LIVE</span>
           </div>
-          <div class="feature-item">
-            <div>🚒 <strong>Polis & Bomba</strong></div>
-            <p style="font-size:0.78rem; color:#9ca3af; margin:4px 0 0 0;">Jejari liputan perkhidmatan kecemasan.</p>
+          <div class="tele-grid">
+            <div class="tele-stat">
+              <div class="tele-num">12 PBT</div>
+              <div class="tele-lbl">Liputan Negeri Selangor</div>
+            </div>
+            <div class="tele-stat">
+              <div class="tele-num">1–5 km</div>
+              <div class="tele-lbl">Zon Analisis Buffer</div>
+            </div>
           </div>
-          <div class="feature-item">
-            <div>🏥 <strong>Hospital & Klinik</strong></div>
-            <p style="font-size:0.78rem; color:#9ca3af; margin:4px 0 0 0;">Kemudahsampaian fasiliti kesihatan awam.</p>
+          <div class="tele-legend">
+            <span><i class="dot-ind" style="background:#16a34a;"></i>Masjid</span>
+            <span><i class="dot-ind" style="background:#dc2626;"></i>Bomba/Polis</span>
+            <span><i class="dot-ind" style="background:#2563eb;"></i>Kesihatan</span>
           </div>
         </div>
-        <button class="big-cta-btn" onclick="enterPortal()">Buka Peta & Dashboard Sekarang →</button>
       </div>
     </div>
 
-    <div class="app-footer">
-      <div>GEOAKSES SELANGOR © 2026 — ANALISIS GEOSPATIAL</div>
-      <div>Status Portal: <span style="color:#4ade80;">● Aktif</span></div>
-    </div>
+    <!-- Bottom Footer -->
+    <footer class="app-footer">
+      <div><strong>GEOAKSES SELANGOR © 2026</strong> — PORTAL ANALISIS KEBOLEHCAPAIAN FASILITI AWAM</div>
+      <div class="mono-coords" id="heroCoords">3.0738° N, 101.5183° E • SELANGOR</div>
+    </footer>
   </div>
 
   <!-- 2. MAIN GIS PORTAL -->
@@ -164,7 +403,7 @@
         <button class="tool-btn" onclick="window.print()"><i class="fa-solid fa-print"></i> Cetak</button>
       </div>
 
-      <button class="btn-back" onclick="exitPortal()"><i class="fa-solid fa-arrow-left"></i> Keluar</button>
+      <button class="btn-back" onclick="exitPortal()"><i class="fa-solid fa-arrow-left"></i> Halaman Utama</button>
     </header>
 
     <div id="main-portal">
@@ -177,10 +416,10 @@
         <div>
           <div class="panel-section-title">📂 Lapisan Data GIS</div>
           <div class="layer-group">
-            <label><input type="checkbox" checked id="chkMasjid"> 🕌 Masjid & Surau</label>
-            <label><input type="checkbox" checked id="chkBomba"> 🚒 Balai Bomba</label>
-            <label><input type="checkbox" checked id="chkPolis"> 🚓 Balai Polis</label>
-            <label><input type="checkbox" checked id="chkKesihatan"> 🏥 Hospital & Klinik Awam</label>
+            <label><input type="checkbox" checked id="chkMasjid" onchange="toggleFacilityLayers()"> 🕌 Masjid & Surau</label>
+            <label><input type="checkbox" checked id="chkBomba" onchange="toggleFacilityLayers()"> 🚒 Balai Bomba</label>
+            <label><input type="checkbox" checked id="chkPolis" onchange="toggleFacilityLayers()"> 🚓 Balai Polis</label>
+            <label><input type="checkbox" checked id="chkKesihatan" onchange="toggleFacilityLayers()"> 🏥 Hospital & Klinik Awam</label>
             <label><input type="checkbox" id="chkPerumahan"> 🏡 Zon Perumahan Selangor</label>
           </div>
         </div>
@@ -195,7 +434,7 @@
               <option value="5000">5.0 km (Zon Perkhidmatan)</option>
             </select>
             <button class="btn-analisis" onclick="enableBufferClick()">Uji Buffer Pada Peta</button>
-            <button style="background:#ef4444; color:white; border:none; padding:6px; border-radius:6px; cursor:pointer; font-size:0.75rem;" onclick="clearBuffers()">Padam Semua Buffer</button>
+            <button style="background:#ef4444; color:white; border:none; padding:7px; border-radius:7px; cursor:pointer; font-size:0.76rem; font-weight:600;" onclick="clearBuffers()">Padam Semua Buffer</button>
           </div>
         </div>
       </div>
@@ -209,19 +448,136 @@
   </div>
 
   <script>
+    var heroBgMap;
     var map, geocoderControl;
     var searchMarker = null;
     var bufferLayerGroup;
     var isBufferMode = false;
 
-    function enterPortal() {
+    // Sample Selangor Public Facilities Data
+    const selangorFacilities = [
+      { name: "Masjid Sultan Salahuddin Abdul Aziz Shah", type: "masjid", lat: 3.0785, lng: 101.5206, district: "Shah Alam" },
+      { name: "Masjid Al-Ikhlas Seksyen 13", type: "masjid", lat: 3.0844, lng: 101.5451, district: "Shah Alam" },
+      { name: "Masjid Sultan Abdul Aziz PJ", type: "masjid", lat: 3.0991, lng: 101.6448, district: "Petaling Jaya" },
+      { name: "Masjid Diraja Sultan Suleiman", type: "masjid", lat: 3.0347, lng: 101.4468, district: "Klang" },
+      { name: "Balai Bomba & Penyelamat Shah Alam", type: "bomba", lat: 3.0694, lng: 101.5112, district: "Shah Alam" },
+      { name: "Balai Bomba & Penyelamat Petaling Jaya", type: "bomba", lat: 3.1045, lng: 101.6412, district: "Petaling Jaya" },
+      { name: "Balai Bomba & Penyelamat Kota Raja", type: "bomba", lat: 3.0389, lng: 101.4519, district: "Klang" },
+      { name: "IPD Shah Alam", type: "polis", lat: 3.0715, lng: 101.5198, district: "Shah Alam" },
+      { name: "IPD Petaling Jaya", type: "polis", lat: 3.1022, lng: 101.6485, district: "Petaling Jaya" },
+      { name: "Hospital Shah Alam", type: "kesihatan", lat: 3.0711, lng: 101.4897, district: "Shah Alam" },
+      { name: "Hospital Tengku Ampuan Rahimah", type: "kesihatan", lat: 3.0195, lng: 101.4401, district: "Klang" },
+      { name: "Hospital Kajang", type: "kesihatan", lat: 2.9927, lng: 101.7925, district: "Kajang" }
+    ];
+
+    var facilityLayers = {
+      masjid: L.layerGroup(),
+      bomba: L.layerGroup(),
+      polis: L.layerGroup(),
+      kesihatan: L.layerGroup()
+    };
+
+    // Initialize Interactive Background Map on Landing Page
+    window.addEventListener('DOMContentLoaded', () => {
+      heroBgMap = L.map('hero-bg-map', {
+        center: [3.0738, 101.5350],
+        zoom: 12,
+        zoomControl: false,
+        attributionControl: false,
+        scrollWheelZoom: false
+      });
+
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+        maxZoom: 18
+      }).addTo(heroBgMap);
+
+      const typeColors = {
+        masjid: '#16a34a',
+        bomba: '#dc2626',
+        polis: '#ea580c',
+        kesihatan: '#2563eb'
+      };
+
+      // Add Pulsing Facility Beacons & Coverage Buffers to Background Map
+      const networkPoints = [];
+      selangorFacilities.forEach(fac => {
+        const col = typeColors[fac.type] || '#0284c7';
+        const icon = L.divIcon({
+          className: '',
+          html: `<div class="beacon-pin" style="background:${col}; color:${col};"></div>`,
+          iconSize: [14, 14],
+          iconAnchor: [7, 7]
+        });
+
+        L.marker([fac.lat, fac.lng], { icon: icon })
+          .addTo(heroBgMap)
+          .bindTooltip(`<b>${fac.name}</b><br><span style="font-size:11px;color:#475569;">${fac.district}</span>`, {
+            direction: 'top',
+            offset: [0, -6]
+          });
+
+        // Subtle Accessibility Coverage Circle
+        L.circle([fac.lat, fac.lng], {
+          radius: 1800,
+          color: col,
+          weight: 1,
+          opacity: 0.35,
+          fillColor: col,
+          fillOpacity: 0.08
+        }).addTo(heroBgMap);
+
+        if (fac.district === "Shah Alam") {
+          networkPoints.push([fac.lat, fac.lng]);
+        }
+      });
+
+      // Draw Spatial Accessibility Network Lines connecting Shah Alam Hub
+      if (networkPoints.length > 1) {
+        L.polyline(networkPoints, {
+          color: '#0284c7',
+          weight: 2,
+          opacity: 0.45,
+          dashArray: '6, 8'
+        }).addTo(heroBgMap);
+      }
+
+      heroBgMap.on('mousemove', (e) => {
+        document.getElementById('heroCoords').textContent =
+          `${e.latlng.lat.toFixed(4)}° N, ${e.latlng.lng.toFixed(4)}° E • SELANGOR`;
+      });
+    });
+
+    function focusHeroDistrict(lat, lng, zoom, btn) {
+      document.querySelectorAll('.dist-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      heroBgMap.flyTo([lat, lng + 0.015], zoom, { duration: 1.2 });
+      document.getElementById('heroCoords').textContent =
+        `${lat.toFixed(4)}° N, ${lng.toFixed(4)}° E • ${btn.textContent.toUpperCase()}`;
+    }
+
+    function enterPortal(filterType) {
       const landing = document.getElementById('landing-page');
       landing.style.opacity = '0';
-      setTimeout(() => { landing.style.visibility = 'hidden'; }, 500);
+      setTimeout(() => { landing.style.visibility = 'hidden'; }, 550);
 
       if (!window.mapInitialized) {
         initMap();
         window.mapInitialized = true;
+      }
+
+      // Apply layer filter based on clicked landing card
+      if (filterType && filterType !== 'all') {
+        document.getElementById('chkMasjid').checked = (filterType === 'masjid');
+        document.getElementById('chkBomba').checked = (filterType === 'keselamatan');
+        document.getElementById('chkPolis').checked = (filterType === 'keselamatan');
+        document.getElementById('chkKesihatan').checked = (filterType === 'kesihatan');
+        toggleFacilityLayers();
+      } else {
+        document.getElementById('chkMasjid').checked = true;
+        document.getElementById('chkBomba').checked = true;
+        document.getElementById('chkPolis').checked = true;
+        document.getElementById('chkKesihatan').checked = true;
+        toggleFacilityLayers();
       }
     }
 
@@ -232,26 +588,46 @@
     }
 
     function initMap() {
-      // 1. Basemaps
       var esriSat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: 'Tiles © Esri' });
       var esriTopo = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', { attribution: 'Tiles © Esri' });
       var osmStreets = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' });
 
       map = L.map('map', {
         center: [3.0738, 101.5085],
-        zoom: 11,
-        layers: [esriSat]
+        zoom: 12,
+        layers: [osmStreets]
       });
 
-      // Layer Control (ArcGIS Pro style)
       var baseMaps = {
-        "ArcGIS Satelit (Imagery)": esriSat,
+        "OpenStreetMap Streets": osmStreets,
         "ArcGIS Topographic": esriTopo,
-        "OpenStreetMap Streets": osmStreets
+        "ArcGIS Satelit (Imagery)": esriSat
       };
       L.control.layers(baseMaps, null, { position: 'topright' }).addTo(map);
 
-      // 2. Geocoder Search Tool yang dikemas kini (Butang 'X' terus buang marker)
+      // Populate Facility Layers on Main Map
+      const badgeStyles = {
+        masjid: { color: '#16a34a', label: 'Masjid / Surau' },
+        bomba: { color: '#ef4444', label: 'Balai Bomba' },
+        polis: { color: '#f97316', label: 'Balai Polis' },
+        kesihatan: { color: '#2563eb', label: 'Hospital / Klinik' }
+      };
+
+      selangorFacilities.forEach(fac => {
+        const st = badgeStyles[fac.type];
+        const marker = L.circleMarker([fac.lat, fac.lng], {
+          radius: 8,
+          fillColor: st.color,
+          color: '#ffffff',
+          weight: 2,
+          opacity: 1,
+          fillOpacity: 0.9
+        }).bindPopup(`<b>${fac.name}</b><br>Kategori: ${st.label}<br>Daerah: ${fac.district}`);
+        facilityLayers[fac.type].addLayer(marker);
+      });
+
+      Object.values(facilityLayers).forEach(lg => lg.addTo(map));
+
       geocoderControl = L.Control.geocoder({
         defaultMarkGeocode: false,
         placeholder: "Cari lokasi di Selangor..."
@@ -265,12 +641,10 @@
         ]);
         map.fitBounds(poly.getBounds());
 
-        // Buang marker lama jika ada
         if (searchMarker) {
           map.removeLayer(searchMarker);
         }
 
-        // Tambah marker baru beserta Event Listener bila Popup Ditutup / Butang 'X' Ditekan
         searchMarker = L.marker(e.geocode.center).addTo(map)
           .bindPopup(e.geocode.name)
           .openPopup();
@@ -285,44 +659,60 @@
 
       bufferLayerGroup = L.layerGroup().addTo(map);
 
-      // 3. Tambah Petunjuk / Legend Peta
       var legend = L.control({ position: 'bottomleft' });
       legend.onAdd = function (map) {
         var div = L.DomUtil.create('div', 'map-legend');
         div.innerHTML = `
           <h4>Petunjuk Peta</h4>
-          <div class="legend-item"><span class="legend-color" style="background:#22c55e;"></span> Masjid / Surau</div>
+          <div class="legend-item"><span class="legend-color" style="background:#16a34a;"></span> Masjid / Surau</div>
           <div class="legend-item"><span class="legend-color" style="background:#ef4444;"></span> Balai Bomba</div>
-          <div class="legend-item"><span class="legend-color" style="background:#3b82f6;"></span> Hospital / Klinik</div>
+          <div class="legend-item"><span class="legend-color" style="background:#f97316;"></span> Balai Polis</div>
+          <div class="legend-item"><span class="legend-color" style="background:#2563eb;"></span> Hospital / Klinik</div>
           <div class="legend-item"><span class="legend-color" style="background:rgba(59,130,246,0.4); border:1px solid #2563eb;"></span> Zon Buffer</div>
         `;
         return div;
       };
       legend.addTo(map);
 
-      // Kemaskini Koordinat Lat/Long
       map.on('mousemove', function(e) {
         document.getElementById('coordsDisplay').innerHTML = 
           'Lat: ' + e.latlng.lat.toFixed(4) + ' | Long: ' + e.latlng.lng.toFixed(4);
       });
 
-      // Buffer Klik Peta
       map.on('click', function(e) {
         if (isBufferMode) {
           var radius = parseInt(document.getElementById('bufferRadius').value);
           
-          var bMarker = L.marker(e.latlng).addTo(bufferLayerGroup)
+          L.marker(e.latlng).addTo(bufferLayerGroup)
             .bindPopup("<b>Titik Analisis Buffer</b><br>Jejari: " + (radius/1000) + " km").openPopup();
 
           L.circle(e.latlng, {
-            color: '#2563eb',
-            fillColor: '#60a5fa',
+            color: '#0284c7',
+            fillColor: '#38bdf8',
             fillOpacity: 0.35,
             radius: radius
           }).addTo(bufferLayerGroup);
 
           isBufferMode = false;
           map.getContainer().style.cursor = '';
+        }
+      });
+    }
+
+    function toggleFacilityLayers() {
+      if (!map) return;
+      const checks = {
+        masjid: document.getElementById('chkMasjid').checked,
+        bomba: document.getElementById('chkBomba').checked,
+        polis: document.getElementById('chkPolis').checked,
+        kesihatan: document.getElementById('chkKesihatan').checked
+      };
+
+      Object.keys(checks).forEach(key => {
+        if (checks[key]) {
+          if (!map.hasLayer(facilityLayers[key])) map.addLayer(facilityLayers[key]);
+        } else {
+          if (map.hasLayer(facilityLayers[key])) map.removeLayer(facilityLayers[key]);
         }
       });
     }
